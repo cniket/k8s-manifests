@@ -3,7 +3,7 @@ kind: VirtualMachine
 metadata:
   name: centos-ovs-multus
 spec:
-  runStrategy: Always
+  runStrategy: Manual
   template:
     metadata:
       labels: {}
