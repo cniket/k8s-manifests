@@ -1,0 +1,62 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: centos-ovs-multus
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      labels: {}
+    spec:
+      domain:
+        devices:
+          interfaces:
+            - name: default
+              masquerade: {}
+            - name: centos-ovs-multus-interface-1
+              bridge: {}
+              ports:
+              - port: 22
+              - port: 80
+              - port: 443
+          disks:
+            - name: volume-1
+              disk:
+                bus: virtio
+            - name: cloudinit
+              disk:
+                bus: virtio
+        cpu:
+          cores: 2
+        resources:
+          requests:
+            memory: 4G
+      networks:
+        - name: default
+          pod: {}
+        - name: centos-ovs-multus-interface-1
+          multus:
+            networkName: ovs-ipam-net
+      volumes:
+        - name: volume-1
+          dataVolume:
+            name: centos-ovs-multus-disk-1
+        - name: cloudinit
+          cloudInitNoCloud:
+            userDataBase64: >-
+              I2Nsb3VkLWNvbmZpZwpwYXNzd29yZDogY2VudG9zMTIzCnNzaF9wd2F1dGg6IFRydWUKbWFuYWdlX2V0Y19ob3N0czogdHJ1ZQpjaHBhc3N3ZDogeyBleHBpcmU6IEZhbHNlIH0Kc3NoX2F1dGhvcml6ZWRfa2V5czoKICAtIHNzaC1yc2EgQUFBQUIzTnphQzF5YzJFQUFBQURBUUFCQUFBQ0FRQ2xabEVtWkxXK0dXWHRwMXhzQnJRQlVnZ1gvSzlZazNDOC9OQ1JwUHVxQ3lGdUlDWi8rbVRCL0l2SWFzME1SK1FoTTMvb0lJTktac0NJTEQ5SmkvUlg5YVphRS83WDhvTkZsOHpyUnpLWHFDV3E2M0ZjdHlVbm02NEtqQ3grd0dzbSs2NEdCcG01RnNQNitzOUlkbTlIOFpReE1iYjZnK2c2M3hMcVgwRHRYRno5VEs4K2o0R1I1dFFMZVpiTkdhSUJJazBEZ3hhL0xQdjM4YWRqLzFRcFIzUHB4RDFOa0dKMEU5Q2Y5R3NZM2w5QkpoNW9icjRNQ0tQaG9HNWFBK3ZnSWhwNFZaQndPeW1xZm1rTlVFc3g4dTRCNGlTd0ptZEp1WHdKVFo5elVRcTJnWmVYUk9WTWtzcExiejdwV0VsZ1ZmRDJoR21NSFBLZmp2K25WVUFaVDZNQk02eWZROHBJN244TTV4eTVpQ29TNHU3S3FINHI4b3RtRlBhQkIwL3RmcmtjN0VXNktqK21ZV3ovb1hTbmcvbEJpTDFNZUozTDNCZGFyczNFd0NwdERCc2VjVUFIajZXK21aOEVybkJCZHVMc3NiS0pDaDkraFdCUjZXZ0NCaFczc201RXJSNUpTZ1RqejJScGM0azlxL09Oa2xoaTYrWVJkZFdVLzdwMStVUVZYWllTampPb29WU1ROYzM1eEo4RWx5Nzc5NHVjQjAzZnRNNUszRjlmRlBPeEd1cFZmaTk2dGhnS1VDc1R0ZjZScm05SFovUjhGOWNyRXZGUHJVdGc2ZlBTd1VGNDdJOEt6VmQ5dll6S3JPVGtnL1lncUw4N3krdndYR0FnVTQ4UXlBU245VGM0QlBQaU5jNndUU1RucGZ6aGhpR1R6ZjFlZ2V6MkF3PT0gbmlrZXRAcGxhdGZvcm05LmNvbQ==
+  dataVolumeTemplates:
+    - metadata:
+        name: centos-ovs-multus-disk-1
+      spec:
+        source:
+          http:
+            url: >-
+              https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-2111.qcow2
+        pvc:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: rook-cephfs
